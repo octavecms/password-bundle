@@ -1,8 +1,7 @@
 <?php
 
-namespace Octave\ToolsBundle\DependencyInjection;
+namespace Octave\PasswordBundle\DependencyInjection;
 
-use Octave\PasswordBundle\DependencyInjection\Configuration;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
