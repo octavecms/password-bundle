@@ -1,0 +1,28 @@
+{
+  "name": "octave/password-bundle",
+  "type": "symfony-bundle",
+  "description": "Symfony4 user password utils",
+  "license": "MIT",
+  "keywords": ["password"],
+  "homepage": "http://octavecms.com",
+  "authors": [
+    {
+      "name": "Igor Lukashov",
+      "email": "igor.lukashov@octavecms.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "symfony/framework-bundle": "^3.0 || ^4.0",
+    "symfony/security-bundle": "~4.2",
+    "friendsofsymfony/user-bundle": "~2.0",
+    "rollerworks/password-strength-validator": "^1.1",
+    "symfony/orm-pack": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Octave\\PasswordBundle\\": "src/"
+    }
+  }
+}

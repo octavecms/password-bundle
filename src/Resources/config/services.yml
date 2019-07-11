@@ -1,0 +1,32 @@
+parameters:
+
+    octave.password.change.password.path: '/password/change'
+    octave.password.renew.password.path: '/password/renew/{token}'
+
+services:
+
+    _defaults:
+        public: true
+        autowire: true
+
+    Octave\PasswordBundle\EventListener\PasswordChangeSubscriber:
+        arguments:
+            - '@router'
+            - '@security.token_storage'
+            - '%octave.password.lifetime%'
+            - '%octave.password.redirect.route%'
+            - '%octave.password.send.email%'
+            - '%octave.password.mailer.class%'
+        tags:
+            - { name: kernel.event_subscriber }
+
+    Octave\PasswordBundle\Form\ChangePasswordType:
+        arguments:
+            - '@security.password_encoder'
+            - '%octave.password.ask.current.password%'
+            - '%octave.password.min.length%'
+            - '%octave.password.max.length%'
+            - '%octave.password.user.class%'
+            - '%octave.password.requirements%'
+        tags:
+            - { name: form.type }
