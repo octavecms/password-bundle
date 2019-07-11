@@ -31,6 +31,9 @@ class Configuration implements ConfigurationInterface
             ->integerNode('password_min_len')->end()
             ->integerNode('password_max_len')->end()
             ->arrayNode('requirements')
+            ->prototype('array')
+                ->prototype('scalar')->end()
+            ->end()
             ->end();
 
         return $treeBuilder;
