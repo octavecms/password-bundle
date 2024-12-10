@@ -1,7 +1,7 @@
 parameters:
-
-    octave.password.change.password.path: '/password/change'
-    octave.password.renew.password.path: '/password/renew/{token}'
+    octave.password.change.password.path: 'password/change'
+    octave.password.renew.password.path: 'password/renew/{token}'
+    octave.password.renew.password.request.path: 'password/renew-request'
 
 services:
 
@@ -9,11 +9,18 @@ services:
         public: true
         autowire: true
 
+    Octave\PasswordBundle\Controller\PasswordChangeController:
+        public: true
+        autowire: true
+        tags:
+            - { name: 'container.service_subscriber' }
+            - { name: 'controller.service_arguments' }
+
     Octave\PasswordBundle\EventListener\PasswordChangeSubscriber:
         arguments:
             - '@router'
             - '@security.token_storage'
-            - '%octave.password.lifetime%'
+            - '%octave.password.expiration.days%'
             - '%octave.password.redirect.route%'
             - '%octave.password.send.email%'
             - '%octave.password.mailer.class%'
@@ -22,11 +29,22 @@ services:
 
     Octave\PasswordBundle\Form\ChangePasswordType:
         arguments:
-            - '@security.password_encoder'
-            - '%octave.password.ask.current.password%'
-            - '%octave.password.min.length%'
-            - '%octave.password.max.length%'
-            - '%octave.password.user.class%'
-            - '%octave.password.requirements%'
+                $translator: '@translator'
+                $passwordHasher: '@security.user_password_hasher'
+                $passwordHistoryRepository: '@Octave\PasswordBundle\Repository\PasswordHistoryRepository'
+                $entityManager: '@doctrine.orm.entity_manager'
+                $askCurrentPassword: '%octave.password.ask.current.password%'
+                $userClass: '%octave.password.user.class%'
+                $minLength: '%octave.password.min.length%'
+                $maxLength: '%octave.password.max.length%'
+                $complexityLevel: '%octave.password.complexity.level%'
+                $keepHistory: '%octave.password.keep.history%'
+                $historyCount: '%octave.password.history.count%'
         tags:
             - { name: form.type }
+
+    Octave\PasswordBundle\Repository\PasswordHistoryRepository:
+        arguments:
+            $registry: '@doctrine'
+        tags:
+            - { name: 'doctrine.repository_service' }

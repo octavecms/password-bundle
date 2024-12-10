@@ -1,9 +1,14 @@
 octave.password.change.password:
     path: '%octave.password.change.password.path%'
     defaults:
-       _controller: Octave\PasswordBundle\Controller\PasswordChange:changePassword
+       _controller: Octave\PasswordBundle\Controller\PasswordChangeController:changePassword
 
 octave.password.renew.password:
     path: '%octave.password.renew.password.path%'
     defaults:
-       _controller: Octave\PasswordBundle\Controller\PasswordChange:renewPassword
+       _controller: Octave\PasswordBundle\Controller\PasswordChangeController:renewPassword
+
+octave.password.renew.password.request:
+  path: '%octave.password.renew.password.request.path%'
+  defaults:
+    _controller: Octave\PasswordBundle\Controller\PasswordChangeController:request

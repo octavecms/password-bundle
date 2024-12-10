@@ -1,0 +1,39 @@
+{% extends "@FOSUser/layout.html.twig" %}
+
+{% block fos_user_content %}
+    <p class="login-box-msg">{{ 'octave_password.reset.title' | trans({}, 'octave_password') }}</p>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {{ form_start(form, {'attr': {'role': 'form'}}) }}
+    <div class="form-group has-feedback">
+        {{ form_widget(form.email, {
+            'attr': {
+                'class': 'form-control',
+                'placeholder': 'octave_password.email.placeholder' | trans({}, 'octave_password')
+            }
+        }) }}
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <button type="submit" class="btn btn-primary btn-block btn-flat">{{ 'octave_password.reset.button' | trans({}, 'octave_password') }}</button>
+        </div>
+    </div>
+    {{ form_end(form) }}
+
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <a href="{{ path('fos_user_security_login') }}" class="btn btn-link">
+                Back to login
+            </a>
+        </div>
+    </div>
+{% endblock fos_user_content %}
