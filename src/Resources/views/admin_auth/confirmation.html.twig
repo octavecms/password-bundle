@@ -1,0 +1,45 @@
+{# templates/bundles/OctavePasswordBundle/admin_auth/confirmation.html.twig #}
+{% extends "@FOSUser/layout.html.twig" %}
+
+{% block fos_user_content %}
+    <p class="login-box-msg">{{ 'octave_password.admin_auth.confirmation.title'|trans({}, 'octave_password') }}</p>
+
+    {% for flash_message in app.flashes('error') %}
+        <div class="alert alert-danger alert-error">
+            {{ flash_message }}
+        </div>
+    {% endfor %}
+
+    {% for flash_message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ flash_message }}
+        </div>
+    {% endfor %}
+
+    {{ form_start(form, {'attr': {'role': 'form', 'id': 'confirmationForm'}}) }}
+
+    <div class="form-group has-feedback">
+        {{ form_label(form.code) }}
+        {{ form_widget(form.code) }}
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+        {{ form_errors(form.code) }}
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <button type="submit" class="btn btn-primary btn-block btn-flat">
+                {{ 'octave_password.admin_auth.confirmation.button'|trans({}, 'octave_password') }}
+            </button>
+        </div>
+    </div>
+    {{ form_end(form) }}
+    <form action="{{ linkResend }}" method="post" class="mt-3">
+        <div class="row">
+            <div class="col-xs-12">
+                <button type="submit" class="btn btn-link btn-block">
+                    {{ 'octave_password.admin_auth.resend_code.button'|trans({}, 'octave_password') }}
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

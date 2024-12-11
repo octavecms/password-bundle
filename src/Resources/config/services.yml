@@ -3,6 +3,9 @@ parameters:
     octave.password.renew.password.path: 'password/renew/{token}'
     octave.password.renew.password.request.path: 'password/renew-request'
 
+    octave.password.auth.confirmation.path: 'auth/confirmation'
+    octave.password.auth.resend.path: 'auth/resend-code'
+
 services:
 
     _defaults:
@@ -16,6 +19,13 @@ services:
             - { name: 'container.service_subscriber' }
             - { name: 'controller.service_arguments' }
 
+    Octave\PasswordBundle\Controller\AdminAuthController:
+      public: true
+      autowire: true
+      tags:
+        - { name: 'container.service_subscriber' }
+        - { name: 'controller.service_arguments' }
+
     Octave\PasswordBundle\EventListener\PasswordChangeSubscriber:
         arguments:
             - '@router'
@@ -26,6 +36,19 @@ services:
             - '%octave.password.mailer.class%'
         tags:
             - { name: kernel.event_subscriber }
+
+    Octave\PasswordBundle\EventListener\AdminAuthSubscriber:
+        arguments:
+          - '@router'
+          - '@security.token_storage'
+          - '%octave.admin_auth.require.confirmation%'
+          - '%octave.admin_auth.confirmation.code.lifetime%'
+          - '@fos_user.user_manager.default'
+          - '%octave.password.admin.prefix%'
+          - '%octave.password.mailer.class%'
+        tags:
+          - { name: kernel.event_subscriber }
+
 
     Octave\PasswordBundle\Form\ChangePasswordType:
         arguments:

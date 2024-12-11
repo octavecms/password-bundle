@@ -54,7 +54,7 @@ class PasswordChangeSubscriber implements EventSubscriberInterface
      * @param ResetMailerInterface $mailer
      */
     public function __construct(UrlGeneratorInterface $router, TokenStorageInterface $tokenStorage, $expirationDays,
-                                $redirectRouteName, $sendResetEmail)
+                                                      $redirectRouteName, $sendResetEmail)
     {
         $this->router = $router;
         $this->tokenStorage = $tokenStorage;
@@ -68,9 +68,9 @@ class PasswordChangeSubscriber implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
             KernelEvents::REQUEST => 'onKernelRequest'
-        );
+        ];
     }
 
     /**
