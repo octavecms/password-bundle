@@ -2,17 +2,21 @@
 
 namespace Octave\PasswordBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\UserBundle\Model\UserManagerInterface;
+use Octave\PasswordBundle\Entity\UserInvite;
 use Octave\PasswordBundle\Form\AdminAuthConfirmationType;
 use Octave\PasswordBundle\Model\AdminAuthMailerInterface;
 use Octave\PasswordBundle\Model\AdminAuthUserInterface;
+use Octave\PasswordBundle\Service\UserInviteService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Octave\PasswordBundle\Model\ResetMailerInterface;
-use function Symfony\Component\Translation\t;
 
 class AdminAuthController extends AbstractController
 {
@@ -105,5 +109,34 @@ class AdminAuthController extends AbstractController
         }
 
         return $this->redirectToRoute('octave.password.auth.confirmation');
+    }
+
+    public function invite(Request $request, string $token, EntityManagerInterface $entityManager,
+                           UserInviteService $inviteService, TokenStorageInterface $storage, EventDispatcherInterface $dispatcher): Response
+    {
+        if (!$inviteService->isValidInvite($token)) {
+            throw $this->createNotFoundException('Invalid or expired invite link');
+        }
+
+        $invite = $entityManager->getRepository(UserInvite::class)->findOneBy(['token' => $token]);
+        $user = $invite->getUser();
+
+        $user->setForcePasswordChange(true);
+        $entityManager->flush();
+
+        $userToken = new UsernamePasswordToken(
+            $user,
+            'main',
+            $user->getRoles()
+        );
+
+        $storage->setToken($userToken);
+
+        $event = new InteractiveLoginEvent($request, $userToken);
+        $dispatcher->dispatch($event);
+
+        $inviteService->markInviteAsUsed($token);
+
+        return $this->redirectToRoute('octave.password.change.password');
     }
 }

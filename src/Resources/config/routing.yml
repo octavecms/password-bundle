@@ -22,3 +22,8 @@ octave.password.auth.resend:
   path: '%octave.password.auth.resend.path%'
   defaults:
     _controller: Octave\PasswordBundle\Controller\AdminAuthController::resendCode
+
+octave.password.invite:
+  path: '%octave.password.invite.path%'
+  defaults:
+    _controller: Octave\PasswordBundle\Controller\AdminAuthController::invite

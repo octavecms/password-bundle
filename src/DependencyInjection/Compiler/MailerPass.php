@@ -4,6 +4,7 @@ namespace Octave\PasswordBundle\DependencyInjection\Compiler;
 
 use Octave\PasswordBundle\EventListener\AdminAuthSubscriber;
 use Octave\PasswordBundle\EventListener\PasswordChangeSubscriber;
+use Octave\PasswordBundle\Service\UserInviteService;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -17,7 +18,8 @@ class MailerPass implements CompilerPassInterface
     {
         $subscriberClasses = [
             PasswordChangeSubscriber::class,
-            AdminAuthSubscriber::class
+            AdminAuthSubscriber::class,
+            UserInviteService::class,
         ];
 
         foreach ($subscriberClasses as $subscriberClass) {

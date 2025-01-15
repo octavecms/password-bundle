@@ -3,6 +3,7 @@
 namespace Octave\PasswordBundle\DependencyInjection;
 
 use Octave\PasswordBundle\Model\AdminAuthMailerInterface;
+use Octave\PasswordBundle\Model\UserInviteMailerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -29,6 +30,7 @@ class OctavePasswordExtension extends Extension
 
         $container->setAlias(ResetMailerInterface::class, $config['mailer_class']);
         $container->setAlias(AdminAuthMailerInterface::class, $config['mailer_class']);
+        $container->setAlias(UserInviteMailerInterface::class, $config['mailer_class']);
 
         $container->setParameter('octave.password.redirect.route', $config['redirect_route_name']);
         $container->setParameter('octave.password.admin.prefix', $config['admin_prefix_name']);

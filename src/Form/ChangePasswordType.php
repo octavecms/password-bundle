@@ -157,7 +157,7 @@ class ChangePasswordType extends AbstractType
             'second_options' => [
                 'label' => 'octave_password.password.new.confirmation.label'
             ],
-            'invalid_message' => 'octave_password.password.new.validation.mismatch'
+            'invalid_message' => $this->translator->trans('octave_password.password.new.validation.mismatch', [], 'octave_password')
         ]);
 
         $builder->addEventSubscriber(

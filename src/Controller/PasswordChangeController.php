@@ -2,12 +2,11 @@
 
 namespace Octave\PasswordBundle\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use FOS\UserBundle\Model\UserInterface;
 use FOS\UserBundle\Model\UserManagerInterface;
 use Octave\PasswordBundle\Form\ChangePasswordType;
 use Octave\PasswordBundle\Form\ResetPasswordRequestType;
 use Octave\PasswordBundle\Model\ResetUserInterface;
+use Octave\PasswordBundle\Model\UserInviteInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,13 +40,22 @@ class PasswordChangeController extends AbstractController
         /** @var ResetUserInterface $user */
         $user = $this->getUser();
 
+        $isForceChange = false;
+        if ($user instanceof UserInviteInterface) {
+            $isForceChange = $user->isForcePasswordChange();
+        }
+
         $form = $this->createForm(ChangePasswordType::class, $user, [
-            'is_reset_password' => false
+            'is_reset_password' => $isForceChange
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setPasswordChangedAt(new \DateTime());
+
+            if ($isForceChange) {
+                $user->setForcePasswordChange(false);
+            }
             $this->userManager->updateUser($user);
 
             return $this->redirectToRoute('sonata_admin_dashboard');

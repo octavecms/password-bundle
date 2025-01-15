@@ -6,6 +6,8 @@ parameters:
     octave.password.auth.confirmation.path: 'auth/confirmation'
     octave.password.auth.resend.path: 'auth/resend-code'
 
+    octave.password.invite.path: 'invite/{token}'
+
 services:
 
     _defaults:
@@ -49,6 +51,13 @@ services:
         tags:
           - { name: kernel.event_subscriber }
 
+    Octave\PasswordBundle\EventListener\ForcePasswordChangeListener:
+      arguments:
+        - '@router'
+        - '@security.token_storage'
+      tags:
+        - { name: kernel.event_subscriber }
+
 
     Octave\PasswordBundle\Form\ChangePasswordType:
         arguments:
@@ -71,3 +80,8 @@ services:
             $registry: '@doctrine'
         tags:
             - { name: 'doctrine.repository_service' }
+
+    Octave\PasswordBundle\Service\UserInviteService:
+      arguments:
+        - '@doctrine.orm.entity_manager'
+        - '@router'
