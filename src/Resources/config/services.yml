@@ -63,15 +63,12 @@ services:
         arguments:
                 $translator: '@translator'
                 $passwordHasher: '@security.user_password_hasher'
-                $passwordHistoryRepository: '@Octave\PasswordBundle\Repository\PasswordHistoryRepository'
                 $entityManager: '@doctrine.orm.entity_manager'
                 $askCurrentPassword: '%octave.password.ask.current.password%'
                 $userClass: '%octave.password.user.class%'
                 $minLength: '%octave.password.min.length%'
                 $maxLength: '%octave.password.max.length%'
-                $complexityLevel: '%octave.password.complexity.level%'
                 $keepHistory: '%octave.password.keep.history%'
-                $historyCount: '%octave.password.history.count%'
         tags:
             - { name: form.type }
 
@@ -85,3 +82,20 @@ services:
       arguments:
         - '@doctrine.orm.entity_manager'
         - '@router'
+
+    Octave\PasswordBundle\Validator\Constraints\UniquePasswordValidator:
+      arguments:
+        - '@security.user_password_hasher'
+        - '@Octave\PasswordBundle\Repository\PasswordHistoryRepository'
+        - '%octave.password.keep.history%'
+        - '%octave.password.history.count%'
+        - '@translator'
+      tags:
+        - { name: validator.constraint_validator }
+
+    Octave\PasswordBundle\Validator\Constraints\PasswordComplexityValidator:
+      arguments:
+        - '@translator'
+        - '%octave.password.complexity.level%'
+      tags:
+        - { name: validator.constraint_validator }

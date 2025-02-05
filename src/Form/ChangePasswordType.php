@@ -2,6 +2,8 @@
 
 namespace Octave\PasswordBundle\Form;
 
+use Octave\PasswordBundle\Validator\Constraints\PasswordComplexity;
+use Octave\PasswordBundle\Validator\Constraints\UniquePassword;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -11,9 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Octave\PasswordBundle\Repository\PasswordHistoryRepository;
 use Octave\PasswordBundle\EventListener\PasswordHistorySubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -22,42 +22,32 @@ class ChangePasswordType extends AbstractType
 {
     private TranslatorInterface $translator;
     private UserPasswordHasherInterface $passwordHasher;
-    private PasswordHistoryRepository $passwordHistoryRepository;
     private EntityManagerInterface $entityManager;
     private bool $askCurrentPassword;
     private string $userClass;
     private int $minLength;
     private int $maxLength;
-    private string $complexityLevel;
     private bool $keepHistory;
-    private int $historyCount;
-
 
     public function __construct(
         TranslatorInterface         $translator,
         UserPasswordHasherInterface $passwordHasher,
-        PasswordHistoryRepository   $passwordHistoryRepository,
         EntityManagerInterface      $entityManager,
         bool                        $askCurrentPassword,
         string                      $userClass,
         int                         $minLength,
         int                         $maxLength,
-        string                      $complexityLevel,
-        bool                        $keepHistory,
-        int                         $historyCount
+        bool                        $keepHistory
     )
     {
         $this->translator = $translator;
         $this->passwordHasher = $passwordHasher;
-        $this->passwordHistoryRepository = $passwordHistoryRepository;
         $this->entityManager = $entityManager;
         $this->askCurrentPassword = $askCurrentPassword;
         $this->userClass = $userClass;
         $this->minLength = $minLength;
         $this->maxLength = $maxLength;
-        $this->complexityLevel = $complexityLevel;
         $this->keepHistory = $keepHistory;
-        $this->historyCount = $historyCount;
     }
 
     /**
@@ -98,54 +88,10 @@ class ChangePasswordType extends AbstractType
                 'minMessage' => $this->translator->trans('octave_password.password.new.validation.too_short', [], 'octave_password'),
                 'max' => $this->maxLength,
                 'maxMessage' => $this->translator->trans('octave_password.password.new.validation.too_long', [], 'octave_password'),
-            ])
+            ]),
+            new UniquePassword(),
+            new PasswordComplexity()
         ];
-
-        if ($this->askCurrentPassword) {
-            $plainPasswordConstraints[] = new Callback([
-                'callback' => function ($value, ExecutionContextInterface $context) use ($user) {
-                    if ($this->passwordHasher->isPasswordValid($user, $value)) {
-                        $context->buildViolation('Password is not changed')
-                            ->atPath('plainPassword')
-                            ->addViolation();
-                    }
-                }
-            ]);
-        }
-
-        switch ($this->complexityLevel) {
-            case 'high':
-                $plainPasswordConstraints[] = new Regex([
-                    'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=\[\]{};:,.<>\/])/',
-                    'message' => $this->translator->trans('octave_password.password.new.validation.complexity.high', [], 'octave_password')
-                ]);
-                break;
-            case 'medium':
-                $plainPasswordConstraints[] = new Regex([
-                    'pattern' => '/(?=.*[a-zA-Z])(?=.*\d)/',
-                    'message' => $this->translator->trans('octave_password.password.new.validation.complexity.medium', [], 'octave_password')
-                ]);
-                break;
-        }
-
-        if ($this->keepHistory) {
-            $plainPasswordConstraints[] = new Callback([
-                'callback' => function ($value, ExecutionContextInterface $context) use ($user) {
-                    $passwordHistory = $this->passwordHistoryRepository->getPasswordHistory($user, $this->historyCount);
-                    $sha256Hash = hash('sha256', $value);
-
-                    foreach ($passwordHistory as $history) {
-                        if ($sha256Hash === $history->getHashedPassword()) {
-                            $context
-                                ->buildViolation($this->translator->trans('octave_password.password.new.validation.previously_used', [], 'octave_password'))
-                                ->atPath('plainPassword')
-                                ->addViolation();
-                            break;
-                        }
-                    }
-                }
-            ]);
-        }
 
         $builder->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
