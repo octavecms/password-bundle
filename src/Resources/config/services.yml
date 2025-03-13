@@ -1,7 +1,12 @@
 parameters:
+    octave.password.change.password.path: 'password/change'
+    octave.password.renew.password.path: 'password/renew/{token}'
+    octave.password.renew.password.request.path: 'password/renew-request'
 
-    octave.password.change.password.path: '/password/change'
-    octave.password.renew.password.path: '/password/renew/{token}'
+    octave.password.auth.confirmation.path: 'auth/confirmation'
+    octave.password.auth.resend.path: 'auth/resend-code'
+
+    octave.password.invite.path: 'invite/{token}'
 
 services:
 
@@ -9,24 +14,88 @@ services:
         public: true
         autowire: true
 
+    Octave\PasswordBundle\Controller\PasswordChangeController:
+        public: true
+        autowire: true
+        tags:
+            - { name: 'container.service_subscriber' }
+            - { name: 'controller.service_arguments' }
+
+    Octave\PasswordBundle\Controller\AdminAuthController:
+      public: true
+      autowire: true
+      tags:
+        - { name: 'container.service_subscriber' }
+        - { name: 'controller.service_arguments' }
+
     Octave\PasswordBundle\EventListener\PasswordChangeSubscriber:
         arguments:
             - '@router'
             - '@security.token_storage'
-            - '%octave.password.lifetime%'
+            - '%octave.password.expiration.days%'
             - '%octave.password.redirect.route%'
             - '%octave.password.send.email%'
             - '%octave.password.mailer.class%'
         tags:
             - { name: kernel.event_subscriber }
 
+    Octave\PasswordBundle\EventListener\AdminAuthSubscriber:
+        arguments:
+          - '@router'
+          - '@security.token_storage'
+          - '%octave.admin_auth.require.confirmation%'
+          - '%octave.admin_auth.confirmation.code.lifetime%'
+          - '@fos_user.user_manager.default'
+          - '%octave.password.admin.prefix%'
+          - '%octave.password.mailer.class%'
+        tags:
+          - { name: kernel.event_subscriber }
+
+    Octave\PasswordBundle\EventListener\ForcePasswordChangeListener:
+      arguments:
+        - '@router'
+        - '@security.token_storage'
+      tags:
+        - { name: kernel.event_subscriber }
+
+
     Octave\PasswordBundle\Form\ChangePasswordType:
         arguments:
-            - '@security.password_encoder'
-            - '%octave.password.ask.current.password%'
-            - '%octave.password.min.length%'
-            - '%octave.password.max.length%'
-            - '%octave.password.user.class%'
-            - '%octave.password.requirements%'
+                $translator: '@translator'
+                $passwordHasher: '@security.user_password_hasher'
+                $entityManager: '@doctrine.orm.entity_manager'
+                $askCurrentPassword: '%octave.password.ask.current.password%'
+                $userClass: '%octave.password.user.class%'
+                $minLength: '%octave.password.min.length%'
+                $maxLength: '%octave.password.max.length%'
+                $keepHistory: '%octave.password.keep.history%'
         tags:
             - { name: form.type }
+
+    Octave\PasswordBundle\Repository\PasswordHistoryRepository:
+        arguments:
+            $registry: '@doctrine'
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    Octave\PasswordBundle\Service\UserInviteService:
+      arguments:
+        - '@doctrine.orm.entity_manager'
+        - '@router'
+
+    Octave\PasswordBundle\Validator\Constraints\UniquePasswordValidator:
+      arguments:
+        - '@security.user_password_hasher'
+        - '@Octave\PasswordBundle\Repository\PasswordHistoryRepository'
+        - '%octave.password.keep.history%'
+        - '%octave.password.history.count%'
+        - '@translator'
+      tags:
+        - { name: validator.constraint_validator }
+
+    Octave\PasswordBundle\Validator\Constraints\PasswordComplexityValidator:
+      arguments:
+        - '@translator'
+        - '%octave.password.complexity.level%'
+      tags:
+        - { name: validator.constraint_validator }

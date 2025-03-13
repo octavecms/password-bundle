@@ -56,15 +56,20 @@ trait UserPasswordExpiredTrait
      * $lifetime in days
      * @throws \Exception
      */
-    public function isPasswordExpired($lifetime)
+    public function isPasswordExpired($lifetime): bool
     {
-        if (! $this->getPasswordChangedAt()) {
+        if (!$this->getPasswordChangedAt() || $lifetime === 0) {
             return false;
         }
 
-        $currentDate = new \DateTime();
-        $expirationDate = $this->getPasswordChangedAt()->modify("+$lifetime day");
+        $now = new \DateTime();
+        $expirationDate = (clone $this->getPasswordChangedAt())->modify(sprintf('+%d days', $lifetime));
 
-        return $currentDate >= $expirationDate;
+        return $now > $expirationDate;
+    }
+
+    public function generateToken(): string
+    {
+        return sha1(time() . uniqid());
     }
 }

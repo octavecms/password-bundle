@@ -2,7 +2,9 @@
 
 namespace Octave\PasswordBundle\DependencyInjection\Compiler;
 
+use Octave\PasswordBundle\EventListener\AdminAuthSubscriber;
 use Octave\PasswordBundle\EventListener\PasswordChangeSubscriber;
+use Octave\PasswordBundle\Service\UserInviteService;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -14,12 +16,20 @@ class MailerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has(PasswordChangeSubscriber::class)) {
-            return;
-        }
+        $subscriberClasses = [
+            PasswordChangeSubscriber::class,
+            AdminAuthSubscriber::class,
+            UserInviteService::class,
+        ];
 
-        $definition = $container->findDefinition(PasswordChangeSubscriber::class);
-        $id = $container->getParameter('octave.password.mailer.class');
-        $definition->addMethodCall('setMailer', array(new Reference($id)));
+        foreach ($subscriberClasses as $subscriberClass) {
+            if (!$container->has($subscriberClass)) {
+                continue;
+            }
+
+            $definition = $container->findDefinition($subscriberClass);
+            $mailerId = $container->getParameter('octave.password.mailer.class');
+            $definition->addMethodCall('setMailer', [new Reference($mailerId)]);
+        }
     }
 }

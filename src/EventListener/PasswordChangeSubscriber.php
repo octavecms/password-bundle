@@ -27,7 +27,7 @@ class PasswordChangeSubscriber implements EventSubscriberInterface
     /**
      * @var integer
      */
-    private $passwordLifetime;
+    private $expirationDays;
 
     /**
      * @var string
@@ -48,17 +48,17 @@ class PasswordChangeSubscriber implements EventSubscriberInterface
      * PasswordChangeSubscriber constructor.
      * @param UrlGeneratorInterface $router
      * @param TokenStorageInterface $tokenStorage
-     * @param $passwordLifetime
+     * @param $expirationDays
      * @param $redirectRouteName
      * @param $sendResetEmail
      * @param ResetMailerInterface $mailer
      */
-    public function __construct(UrlGeneratorInterface $router, TokenStorageInterface $tokenStorage, $passwordLifetime,
-                                $redirectRouteName, $sendResetEmail)
+    public function __construct(UrlGeneratorInterface $router, TokenStorageInterface $tokenStorage, $expirationDays,
+                                                      $redirectRouteName, $sendResetEmail)
     {
         $this->router = $router;
         $this->tokenStorage = $tokenStorage;
-        $this->passwordLifetime = $passwordLifetime;
+        $this->expirationDays = $expirationDays;
         $this->redirectRouteName = $redirectRouteName;
         $this->sendResetEmail = $sendResetEmail;
     }
@@ -68,9 +68,9 @@ class PasswordChangeSubscriber implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
             KernelEvents::REQUEST => 'onKernelRequest'
-        );
+        ];
     }
 
     /**
@@ -97,23 +97,14 @@ class PasswordChangeSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if ($user instanceof ResetUserInterface && $user->isPasswordExpired($this->passwordLifetime)) {
+        if ($user instanceof ResetUserInterface && $user->isPasswordExpired($this->expirationDays)) {
 
             if ($this->sendResetEmail && $this->mailer instanceof ResetMailerInterface) {
-                $user->setPasswordChangeToken($this->generateToken());
+                $user->setPasswordChangeToken($user->generateToken());
                 $this->mailer->sendReset($user);
             }
 
             $event->setResponse(new RedirectResponse($this->router->generate($this->redirectRouteName)));
-            return;
         }
-    }
-
-    /**
-     * @return string
-     */
-    private function generateToken()
-    {
-        return sha1(time() . uniqid());
     }
 }
