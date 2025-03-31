@@ -19,7 +19,7 @@ trait AdminAuthTrait
     /**
      * @ORM\Column(type="boolean")
      */
-    private $adminAuthConfirmed;
+    private $adminAuthConfirmed = false;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
