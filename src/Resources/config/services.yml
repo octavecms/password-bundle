@@ -69,6 +69,7 @@ services:
                 $minLength: '%octave.password.min.length%'
                 $maxLength: '%octave.password.max.length%'
                 $keepHistory: '%octave.password.keep.history%'
+                $complexityLevel: '%octave.password.complexity.level%'
         tags:
             - { name: form.type }
 

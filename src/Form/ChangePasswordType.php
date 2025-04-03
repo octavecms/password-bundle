@@ -28,6 +28,7 @@ class ChangePasswordType extends AbstractType
     private int $minLength;
     private int $maxLength;
     private bool $keepHistory;
+    private string $complexityLevel;
 
     public function __construct(
         TranslatorInterface         $translator,
@@ -37,7 +38,8 @@ class ChangePasswordType extends AbstractType
         string                      $userClass,
         int                         $minLength,
         int                         $maxLength,
-        bool                        $keepHistory
+        bool                        $keepHistory,
+        string                      $complexityLevel,
     )
     {
         $this->translator = $translator;
@@ -48,6 +50,7 @@ class ChangePasswordType extends AbstractType
         $this->minLength = $minLength;
         $this->maxLength = $maxLength;
         $this->keepHistory = $keepHistory;
+        $this->complexityLevel = $complexityLevel;
     }
 
     /**
@@ -58,6 +61,24 @@ class ChangePasswordType extends AbstractType
     {
         $user = $builder->getData();
         $isResetPassword = $options['is_reset_password'] ?? false;
+
+        $complexity = $this->complexityLevel;
+
+        $helpText = sprintf(
+            'Password must be between %d and %d characters.',
+            $this->minLength,
+            $this->maxLength
+        );
+
+        if ($complexity && $complexity !== 'easy') {
+            $complexityText = $this->translator->trans(
+                "octave_password.password.new.validation.complexity.$complexity",
+                [],
+                'octave_password'
+            );
+
+            $helpText .= ' ' . $complexityText;
+        }
 
         if (!$isResetPassword && $this->askCurrentPassword) {
             $builder
@@ -96,6 +117,7 @@ class ChangePasswordType extends AbstractType
         $builder->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
             'required' => true,
+            'help' => $helpText,
             'first_options' => [
                 'label' => 'octave_password.password.new.label',
                 'constraints' => $plainPasswordConstraints
