@@ -153,11 +153,16 @@ class PasswordChangeController extends AbstractController
                 $this->userManager->updateUser($user);
                 $this->mailer->sendReset($user);
 
-                $this->addFlash('success', $this->translator->trans('octave_password.reset.email_sent', [], 'octave_password'));
+                $this->addFlash('success', $this->translator->trans('octave_password.reset.email_sent', [
+                    '%email%' => $email
+                ], 'octave_password'));
                 return $this->redirectToRoute('fos_user_security_login');
             }
 
-            $this->addFlash('error', $this->translator->trans('octave_password.email.not_found', [], 'octave_password'));
+            $this->addFlash('success', $this->translator->trans('octave_password.reset.email_sent', [
+                '%email%' => $email
+            ], 'octave_password'));
+            return $this->redirectToRoute('fos_user_security_login');
         }
 
         return $this->render('@OctavePassword/request.html.twig', [
