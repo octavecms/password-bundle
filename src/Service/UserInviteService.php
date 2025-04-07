@@ -29,7 +29,7 @@ class UserInviteService
         $this->mailer = $mailer;
     }
 
-    public function createInvite($user): UserInvite
+    public function createInvite($user, $plainPassword): UserInvite
     {
         $invite = new UserInvite();
         $invite->setUser($user);
@@ -39,7 +39,7 @@ class UserInviteService
         $this->em->persist($invite);
         $this->em->flush();
 
-        $this->mailer->sendInviteEmail($invite);
+        $this->mailer->sendInviteEmail($invite, $plainPassword);
 
         return $invite;
     }

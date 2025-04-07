@@ -6,5 +6,5 @@ use Octave\PasswordBundle\Entity\UserInvite;
 
 interface UserInviteMailerInterface
 {
-    public function sendInviteEmail(UserInvite $invite): int;
+    public function sendInviteEmail(UserInvite $invite, $plainPassword): int;
 }
