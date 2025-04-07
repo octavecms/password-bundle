@@ -117,13 +117,13 @@ class ChangePasswordType extends AbstractType
         $builder->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
             'required' => true,
-            'help' => $helpText,
             'first_options' => [
                 'label' => 'octave_password.password.new.label',
                 'constraints' => $plainPasswordConstraints
             ],
             'second_options' => [
-                'label' => 'octave_password.password.new.confirmation.label'
+                'label' => 'octave_password.password.new.confirmation.label',
+                'help' => $helpText,
             ],
             'invalid_message' => $this->translator->trans('octave_password.password.new.validation.mismatch', [], 'octave_password')
         ]);
