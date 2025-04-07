@@ -9,9 +9,7 @@ use Octave\PasswordBundle\Entity\PasswordHistory;
 
 trait UserPasswordHistoryTrait
 {
-    /**
-     * @ORM\OneToMany(targetEntity="Octave\PasswordBundle\Entity\PasswordHistory", mappedBy="user", cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity: PasswordHistory::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private $passwordHistories;
 
     public function __construct()

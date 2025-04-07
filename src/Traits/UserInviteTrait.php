@@ -2,11 +2,11 @@
 
 namespace Octave\PasswordBundle\Traits;
 
+use Doctrine\ORM\Mapping as ORM;
+
 trait UserInviteTrait
 {
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type: 'boolean')]
     private bool $forcePasswordChange = false;
 
     public function isForcePasswordChange(): bool
