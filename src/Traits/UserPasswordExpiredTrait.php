@@ -2,20 +2,14 @@
 
 namespace Octave\PasswordBundle\Traits;
 
+use Doctrine\ORM\Mapping as ORM;
+
 trait UserPasswordExpiredTrait
 {
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private $passwordChangedAt;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $passwordChangeToken;
 
     /**

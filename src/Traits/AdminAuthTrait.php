@@ -6,24 +6,16 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait AdminAuthTrait
 {
-    /**
-     * @ORM\Column(type="string", length=6, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 6, nullable: true)]
     private $adminAuthCode;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private $adminAuthCodeCreatedAt;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type: 'boolean')]
     private $adminAuthConfirmed = false;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private $lastAdminAuthConfirmation;
 
     public function generateAdminAuthCode(): void
